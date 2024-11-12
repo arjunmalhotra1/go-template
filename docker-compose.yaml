@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15.2-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    ports:
+    - 5777:5432
+    networks:
+      - my-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user", "-d","db"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  ourapplication:
+    build: ./
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 8777:8080
+    networks:
+      - my-network
+
+networks:
+  my-network:
